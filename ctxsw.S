@@ -1,137 +1,82 @@
 /**
- * @file testcases.c
- * @provides testcases
+ * @file     ctxsw.s
+ * @provides ctxsw
  *
- * * COSC 3250 - Project #2
- *  * This code is helping xinu keep secerts from his babymama
- *   * @author [JJ Mansour, Steve McDonough]
- *    * Instructor [Dennis Brylow]
- *     * TA-BOT:MAILTO [jack.mansour@marquette.edu, stephen.mcdonough@marquette.edu]
- *
- *
+ * COSC 3250 / COEN 4820 Assignment 4
  */
-/* Embedded XINU, Copyright (C) 2007.  All rights reserved. */
+/* Embedded XINU, Copyright (C) 2013.  All rights reserved. */
 
-#include <xinu.h>
+#include <arm.h>
 
-extern void main(int, char *);
+.text
+	.align 4
+	.globl	ctxsw
 
-int testmain(int argc, char **argv)
-{
-    int i = 0;
-    kprintf("Hello XINU World!\r\n");
-
-    for (i = 0; i < 10; i++)
-    {
-        kprintf("This is process %d\r\n", currpid);
-
-        /* Uncomment the resched() line for cooperative scheduling. */
-        // resched();
-    }
-    return 0;
-}
-
-void testbigargs(int a, int b, int c, int d, int e, int f, int g, int h)
-{
-    kprintf("Testing bigargs...\r\n");
-    kprintf("a = 0x%08X\r\n", a);
-    kprintf("b = 0x%08X\r\n", b);
-    kprintf("c = 0x%08X\r\n", c);
-    kprintf("d = 0x%08X\r\n", d);
-    kprintf("e = 0x%08X\r\n", e);
-    kprintf("f = 0x%08X\r\n", f);
-    kprintf("g = 0x%08X\r\n", g);
-    kprintf("h = 0x%08X\r\n", h);
-}
-
-void printpcb(int pid)
-{
-    pcb *ppcb = NULL;
-
-    /* Using the process ID, access it in the PCB table. */
-    ppcb = &proctab[pid];
-
-    /* Printing PCB */
-    kprintf("Process name		  : %s \r\n", ppcb->name);
-
-    switch (ppcb->state)
-    {
-    case PRFREE:
-        kprintf("State of the process	  : FREE \r\n");
-        break;
-    case PRCURR:
-        kprintf("State of the process 	  : CURRENT \r\n");
-        break;
-    case PRSUSP:
-        kprintf("State of the process	  : SUSPENDED \r\n");
-        break;
-    case PRREADY:
-        kprintf("State of the process	  : READY \r\n");
-        break;
-    default:
-        kprintf("ERROR: Process state not correctly set!\r\n");
-        break;
-    }
-
-    /* Print PCB contents and registers */
-    kprintf("Base of run time stack    : 0x%08X \r\n", ppcb->stkbase);
-    kprintf("Stack length of process   : %8u \r\n", ppcb->stklen);
-}
 
 /**
- * testcases - called after initialization completes to test things.
+ * @fn void ctxsw(&oldstack, &newstack)
+ *
+ * Switch context (values in registers) to another process, saving the
+ * current processes information. This function will not return as normally
+ * thought as it will load in the stack pointer for a different process and
+ * jump to that location and begin executing code.
+ *
+ * @param  &oldstack address of outgoing stack save area
+ * @param  &newstack address of incoming stack save area
+ * @return special case -- see above
  */
-void testcases(void)
-{
-    int c, pid,i;
+ctxsw:
+	str r0,[sp, #CTX_R0 *4]
+	 str r1,[sp, #CTX_R1 *4]
+	 str r2,[sp, #CTX_R2 *4]
+	 str r3,[sp, #CTX_R3 *4]
+	 str r4,[sp, #CTX_R4 *4]
+	 str r5,[sp, #CTX_R5 *4]
+	 str r6,[sp, #CTX_R6 *4]
+	 str r7,[sp, #CTX_R7 *4]
+	 str r8,[sp, #CTX_R8 *4]
+	 str r9,[sp, #CTX_R9 *4]
+	 str r10,[sp, #CTX_R10 *4]
+	 str r11,[sp, #CTX_R11 *4]
 
-    kprintf("0) Test creation of one process\r\n");
-    kprintf("1) Test passing of many args\r\n");
-    kprintf("2) Create three processes and run them\r\n");
+	 
+str sp,[r0]
+ldr sp,[r1]
+	 ldr r0,[sp, #CTX_R0 *4]
+	ldr r1,[sp, #CTX_R1 *4]
+	ldr r2,[sp, #CTX_R2 *4]
+	ldr r3,[sp, #CTX_R3 *4]
+	ldr r4,[sp, #CTX_R4 *4]
+	ldr r5,[sp, #CTX_R5 *4]
+	ldr r6,[sp, #CTX_R6 *4]
+	ldr r7,[sp, #CTX_R7 *4]
+	ldr r8,[sp, #CTX_R8 *4]
+	ldr r9,[sp, #CTX_R9 *4]
+	ldr r10,[sp, #CTX_R10 *4]
+	ldr r11,[sp, #CTX_R11 *4]
+	
+	
+	ldr r14, [sp,#CTX_SP *4]
+	ldr r12, [sp, #CTX_LR *4]
 
-    kprintf("===TEST BEGIN===\r\n");
+// TODO: Save process state, including at least the 
+//	callee-save ("non-volatile") registers.
+// TODO: Restore process state, including at least the
+//	callee-save ("non-volatile") registers.
+//	These call and restore segments must match the register data
+//	layout you choose in create().
+// TODO: Jump to next function.
+//	Note: there are two important values at play here --
+//	the address of the process's function that we want to end up in
+//	once we leave this ctxsw(), and the value we want to have in the
+//	link register.  Those are almost always the same value, except
+//	for the very first time we ctxsw() to a new process, when they
+//	are different.  See create() for more details.
 
-    // TODO: Test your operating system!
+// Note: This bx lr line immediately returns from whence we came.  This
+//	is here as a placeholder so that you don't crash your O/S when
+//	you call ctxsw() before it is complete.  But, this line of code
+//	is not actually a part of a completed solution.
+	bx	lr
 
-    c = kgetc();
-    switch (c)
-    {
-    case '0':
-        // Process creation testcase
-        pid = create((void *)testmain, INITSTK, "MAIN1", 2, 0, NULL);
-        printpcb(pid);
-        break;
-
-    case '1':
-        // Many arguments testcase
-        pid = create((void *)testbigargs, INITSTK, "MAIN1", 8,
-                     0x11111111, 0x22222222, 0x33333333, 0x44444444,
-                     0x55555555, 0x66666666, 0x77777777, 0x88888888);
-        printpcb(pid);
-        // TODO: print out stack with extra args
-        pcb *ppcb = &proctab[pid];
-	ulong *ptr = ppcb -> stkbase;
-	for(i =0; i <24; i++){
-		ptr = ptr -1;
-		kprintf("content of stack location 0x%08x:%d", ptr, *ptr);
-}
-        ready(pid, RESCHED_YES);
-        	break;
-
-    case '2':
-        // Create three copies of a process, and let them play.
-        ready(create((void *)testmain, INITSTK, "MAIN1", 2, 0, NULL),
-              RESCHED_NO);
-        ready(create((void *)testmain, INITSTK, "MAIN2", 2, 0, NULL),
-              RESCHED_NO);
-        ready(create((void *)testmain, INITSTK, "MAIN3", 2, 0, NULL),
-              RESCHED_YES);
-        break;
-
-    default:
-        break;
-    }
-
-    kprintf("\r\n===TEST END===\r\n");
-    return;
-}
+	.end ctxsw
