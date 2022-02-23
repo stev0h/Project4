@@ -1,8 +1,16 @@
 /**
+ * COSC 3250 - Project 4
+ * create.c for the context switch.
+ * @author Sam Schulz, Tim Tscheppe
+ * Instructor Dennis Brylow
+ * TA-BOT:MAILTO samuel.schulz@marquette.edu, timothy.tscheppe@marquette.edu
+ */
+
+/**
  * @file create.c
  * @provides create, newpid, userret
  *
- * COSC 3250 / COEN 4820 Assignment 4
+ * COSC 3250 Assignment 4
  */
 /* Embedded XINU, Copyright (C) 2008.  All rights reserved. */
 
@@ -28,7 +36,6 @@ syscall create(void *funcaddr, ulong ssize, char *name, ulong nargs, ...)
     ulong i;
     va_list ap;                 /* points to list of var args   */
     ulong pads = 0;             /* padding entries in record.   */
-    void INITRET(void);
 
     if (ssize < MINSTK)
         ssize = MINSTK;
@@ -44,8 +51,8 @@ syscall create(void *funcaddr, ulong ssize, char *name, ulong nargs, ...)
 
     numproc++;
     ppcb = &proctab[pid];
-
-    // TODO: Setup PCB entry for new process.
+	
+	// TODO: Setup PCB entry for new process.
 
     /* Initialize stack with accounting block. */
     *saddr = STACKMAGIC;
@@ -65,11 +72,13 @@ syscall create(void *funcaddr, ulong ssize, char *name, ulong nargs, ...)
         *--saddr = 0;
     }
 
-    // TODO: Initialize process context.
-    //
-    // TODO:  Place arguments into activation record.
-    //        See K&R 7.3 for example using va_start, va_arg and
-    //        va_end macros for variable argument functions.
+	// TODO: Initialize process context.
+	//
+	// TODO:  Place arguments into activation record.
+	//        See K&R 7.3 for example using va_start, va_arg and
+	//        va_end macros for variable argument functions.
+	va_start(ap, nargs);
+	saddr[0-3] = va_arg(ap, ulong);
 
     return pid;
 }

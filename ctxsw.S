@@ -1,4 +1,12 @@
 /**
+ * COSC 3250 - Project 4
+ * The infamous context switch.
+ * @author Sam Schulz, Tim Tscheppe
+ * Instructor Dennis Brylow
+ * TA-BOT:MAILTO samuel.schulz@marquette.edu, timothy.tscheppe@marquette.edu
+ */
+
+/**
  * @file     ctxsw.s
  * @provides ctxsw
  *
@@ -33,6 +41,13 @@ ctxsw:
 //	callee-save ("non-volatile") registers.
 //	These call and restore segments must match the register data
 //	layout you choose in create().
+	
+	mrs r12, cpsr
+	push {r0-r14}
+
+	str sp, [r0]
+	ldr sp, [r1]
+
 // TODO: Jump to next function.
 //	Note: there are two important values at play here --
 //	the address of the process's function that we want to end up in
@@ -41,10 +56,15 @@ ctxsw:
 //	for the very first time we ctxsw() to a new process, when they
 //	are different.  See create() for more details.
 
+	pop {r0-r12}
+	msr cpsr_c, r12
+	pop {lr, pc}
+
 // Note: This bx lr line immediately returns from whence we came.  This
 //	is here as a placeholder so that you don't crash your O/S when
 //	you call ctxsw() before it is complete.  But, this line of code
 //	is not actually a part of a completed solution.
-	bx	lr
+
+	//bx   lr
 
 	.end ctxsw

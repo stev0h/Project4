@@ -1,4 +1,13 @@
 /**
+ * COSC 3250 - Project 4
+ * Test cases for the context switch.
+ * @author Sam Schulz, Tim Tscheppe
+ * Instructor Dennis Brylow
+ * TA-BOT:MAILTO samuel.schulz@marquette.edu, timothy.tscheppe@marquette.edu
+ */
+
+
+/**
  * @file testcases.c
  * @provides testcases
  *
@@ -104,7 +113,13 @@ void testcases(void)
                      0x55555555, 0x66666666, 0x77777777, 0x88888888);
         printpcb(pid);
         // TODO: print out stack with extra args
-        // TODO: ready(pid, RESCHED_YES);
+        pcb * ppcb = &proctab[pid];
+	for(int i=0; i < ppcb->stklen; i++)
+	{
+		ulong * ptr = ppcb->stkbase - i;
+		kprintf("Contents of stack location 0x%08x:%d",ptr, *ptr);
+	}
+        ready(pid, RESCHED_YES);
         break;
 
     case '2':
